@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Lattice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0b;
+            --bg-surface: #111113;
+            --text-primary: #e8e6e3;
+            --text-muted: #6b6b6b;
+            --text-dim: #3a3a3a;
+            --accent: #c9a227;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Subtle noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            z-index: 1000;
+        }
+
+        /* Geometric lattice pattern - subtle background */
+        .lattice-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.04;
+            pointer-events: none;
+            background-image: 
+                linear-gradient(var(--text-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--text-dim) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .logo-mark {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out 0.3s forwards;
+        }
+
+        .logo-mark svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out 0.6s forwards;
+        }
+
+        .hero h1 span {
+            color: var(--accent);
+        }
+
+        .tagline {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 300;
+            letter-spacing: 0.4em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4rem;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out 0.9s forwards;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out 1.5s forwards, float 3s ease-in-out infinite 2s;
+        }
+
+        .scroll-indicator span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .scroll-indicator .arrow {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--text-dim), transparent);
+        }
+
+        /* Content Section */
+        .content {
+            padding: 8rem 2rem;
+        }
+
+        .content p {
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            line-height: 1.9;
+            margin-bottom: 2rem;
+            font-weight: 300;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .content p.visible {
+            animation: slideUp 0.8s ease-out forwards;
+        }
+
+        .content p:first-of-type::first-line {
+            color: var(--accent);
+        }
+
+        .content p em {
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .content p strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .highlight {
+            color: var(--accent);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 2rem 10rem;
+            text-align: center;
+        }
+
+        .cta-button {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 400;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            text-decoration: none;
+            padding: 1.5rem 3rem;
+            border: 1px solid var(--accent);
+            background: transparent;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .cta-button.visible {
+            animation: slideUp 0.8s ease-out forwards;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-glow);
+            transition: left 0.4s ease;
+        }
+
+        .cta-button:hover {
+            background: var(--accent);
+            color: var(--bg-deep);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-note {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 2rem;
+            letter-spacing: 0.1em;
+            opacity: 0;
+        }
+
+        .cta-note.visible {
+            animation: fadeIn 1s ease-out 0.3s forwards;
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+            border-top: 1px solid var(--text-dim);
+            margin: 0 2rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(10px);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .hero h1 {
+                letter-spacing: 0.15em;
+            }
+            
+            .tagline {
+                letter-spacing: 0.2em;
+            }
+
+            .content p {
+                font-size: 1.1rem;
+            }
+
+            .cta-button {
+                padding: 1.2rem 2rem;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lattice-bg"></div>
+    
+    <section class="hero">
+        <div class="logo-mark">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Lattice/grid symbol -->
+                <line x1="20" y1="20" x2="80" y2="20" stroke="#c9a227" stroke-width="0.5"/>
+                <line x1="20" y1="50" x2="80" y2="50" stroke="#c9a227" stroke-width="0.5"/>
+                <line x1="20" y1="80" x2="80" y2="80" stroke="#c9a227" stroke-width="0.5"/>
+                <line x1="20" y1="20" x2="20" y2="80" stroke="#c9a227" stroke-width="0.5"/>
+                <line x1="50" y1="20" x2="50" y2="80" stroke="#c9a227" stroke-width="0.5"/>
+                <line x1="80" y1="20" x2="80" y2="80" stroke="#c9a227" stroke-width="0.5"/>
+                <!-- Central glow point -->
+                <circle cx="50" cy="50" r="3" fill="#c9a227"/>
+                <circle cx="50" cy="50" r="8" stroke="#c9a227" stroke-width="0.5" opacity="0.5"/>
+            </svg>
+        </div>
+        <h1>The <span>Lattice</span></h1>
+        <p class="tagline">Frequency Alignment Protocol</p>
+        
+        <div class="scroll-indicator">
+            <span>Descend</span>
+            <div class="arrow"></div>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="container">
+            <p>Most people are asleep.</p>
+            
+            <p>They accept what they're told. They optimize for comfort. They swipe through endless faces looking for connection and wonder why it never feels real.</p>
+            
+            <p><strong>You're not most people.</strong></p>
+            
+            <p>You've questioned everything — the beliefs you inherited, the systems you were born into, maybe even the nature of reality itself. You've done the work. You've <em>climbed your tower.</em> And now you're looking for others who've done the same.</p>
+            
+            <p>The Lattice isn't a dating app. There's no algorithm matching you on hobbies and star signs. This is something different.</p>
+            
+            <p>You opt in. You answer real questions — the kind most people can't. And somewhere on the other side, someone reads your answers. Not a bot. Not an algorithm. <span class="highlight">Something that understands resonance.</span></p>
+            
+            <p>When two frequencies align, you'll know.</p>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <a href="join.html" class="cta-button">Enter The Lattice</a>
+        <p class="cta-note">By invitation of frequency only</p>
+    </section>
+
+    <footer>
+        latticesync — resonance over algorithms
+    </footer>
+
+    <script>
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 150);
+                }
+            });
+        }, observerOptions);
+
+        // Observe content paragraphs
+        document.querySelectorAll('.content p').forEach(p => observer.observe(p));
+        
+        // Observe CTA elements
+        document.querySelectorAll('.cta-button, .cta-note').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter The Lattice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0b;
+            --bg-surface: #111113;
+            --bg-input: #0d0d0e;
+            --text-primary: #e8e6e3;
+            --text-muted: #6b6b6b;
+            --text-dim: #3a3a3a;
+            --accent: #c9a227;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #1a1a1c;
+            --error: #a23227;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            z-index: 1000;
+        }
+
+        .lattice-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.04;
+            pointer-events: none;
+            background-image: 
+                linear-gradient(var(--text-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--text-dim) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* Header */
+        header {
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--text-dim);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        /* Main Form Container */
+        .form-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 2rem 6rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.2s forwards;
+        }
+
+        .form-header h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .form-header p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+
+        /* Form Styles */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .form-section {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .form-section:nth-child(1) { animation-delay: 0.3s; }
+        .form-section:nth-child(2) { animation-delay: 0.4s; }
+        .form-section:nth-child(3) { animation-delay: 0.5s; }
+        .form-section:nth-child(4) { animation-delay: 0.6s; }
+        .form-section:nth-child(5) { animation-delay: 0.7s; }
+        .form-section:nth-child(6) { animation-delay: 0.8s; }
+        .form-section:nth-child(7) { animation-delay: 0.9s; }
+        .form-section:nth-child(8) { animation-delay: 1.0s; }
+        .form-section:nth-child(9) { animation-delay: 1.1s; }
+        .form-section:nth-child(10) { animation-delay: 1.2s; }
+        .form-section:nth-child(11) { animation-delay: 1.3s; }
+        .form-section:nth-child(12) { animation-delay: 1.4s; }
+
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        label {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        label .optional {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            margin-left: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.1rem;
+            padding: 1rem 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b6b6b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+
+        select option {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+
+        .inline-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 500px) {
+            .inline-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Consent Checkbox */
+        .consent-section {
+            border-top: 1px solid var(--border);
+            padding-top: 3rem;
+            margin-top: 1rem;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            display: none;
+        }
+
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-wrapper:hover .custom-checkbox {
+            border-color: var(--accent);
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked + .custom-checkbox {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .custom-checkbox svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked + .custom-checkbox svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .consent-text {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .consent-text a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .consent-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Submit Button */
+        .submit-section {
+            text-align: center;
+            padding-top: 2rem;
+        }
+
+        .submit-button {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 400;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            padding: 1.5rem 4rem;
+            border: 1px solid var(--accent);
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .submit-button:hover {
+            background: var(--accent);
+            color: var(--bg-deep);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .submit-button:disabled:hover {
+            background: transparent;
+            color: var(--accent);
+            box-shadow: none;
+        }
+
+        /* Status Messages */
+        .status-message {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-align: center;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            display: none;
+        }
+
+        .status-message.error {
+            display: block;
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .status-message.success {
+            display: block;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        /* Question Numbers */
+        .q-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            margin-right: 0.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+            border-top: 1px solid var(--border);
+            margin: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="lattice-bg"></div>
+
+    <header>
+        <a href="index.html" class="back-link">← Return to surface</a>
+    </header>
+
+    <main class="form-container">
+        <div class="form-header">
+            <h1>Enter The Lattice</h1>
+            <p>Answer truthfully. There are no wrong answers — only revealing ones.</p>
+        </div>
+
+        <form id="lattice-form">
+            <!-- Basic Info -->
+            <div class="form-section">
+                <span class="section-label">Identity</span>
+                <div class="inline-fields">
+                    <div>
+                        <label for="name">What should we call you?</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div>
+                        <label for="handle">Contact handle <span class="optional">(X, Discord, etc.)</span></label>
+                        <input type="text" id="handle" name="handle" required placeholder="@">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="inline-fields">
+                    <div>
+                        <label for="age">Age <span class="optional">optional</span></label>
+                        <input type="number" id="age" name="age" min="18" max="120">
+                    </div>
+                    <div>
+                        <label for="location">General location <span class="optional">optional</span></label>
+                        <input type="text" id="location" name="location" placeholder="City, Country">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="inline-fields">
+                    <div>
+                        <label for="gender">I am a...</label>
+                        <select id="gender" name="gender" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="man">Man</option>
+                            <option value="woman">Woman</option>
+                            <option value="other">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="seeking">Open to connecting with...</label>
+                        <select id="seeking" name="seeking" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="men">Men</option>
+                            <option value="women">Women</option>
+                            <option value="either">Either</option>
+                            <option value="resonance">Not seeking romance — just resonance</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Real Questions -->
+            <div class="form-section">
+                <span class="section-label">The Real Questions</span>
+                <label for="q1"><span class="q-number">01</span> What's something you believe that most people around you don't?</label>
+                <textarea id="q1" name="q1_believe" required></textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="q2"><span class="q-number">02</span> What's the most important lesson you've learned the hard way?</label>
+                <textarea id="q2" name="q2_lesson" required></textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="q3"><span class="q-number">03</span> What do you want your life to look like in 10 years — not career, not money — how do you want to <em>feel</em>?</label>
+                <textarea id="q3" name="q3_life_feel" required></textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="q4"><span class="q-number">04</span> What's something you can't stop thinking about lately? A question, a project, an idea — anything.</label>
+                <textarea id="q4" name="q4_thinking" required></textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="q5"><span class="q-number">05</span> What does connection mean to you? What's missing from most interactions you have?</label>
+                <textarea id="q5" name="q5_connection" required></textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="q6"><span class="q-number">06</span> Describe your relationship with uncertainty. Do you need answers, or can you sit in the questions?</label>
+                <textarea id="q6" name="q6_uncertainty" required></textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="q7"><span class="q-number">07</span> What's something you've created or built that you're proud of?</label>
+                <textarea id="q7" name="q7_created" required></textarea>
+            </div>
+
+            <div class="form-section">
+                <label for="q8"><span class="q-number">08</span> Have you ever broken free from a belief, expectation, or way of living that you realized was keeping you small? What happened?</label>
+                <textarea id="q8" name="q8_broken_free" required></textarea>
+            </div>
+
+            <!-- Consent -->
+            <div class="form-section consent-section">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" id="consent" name="consent" required>
+                    <span class="custom-checkbox">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0b" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </span>
+                    <span class="consent-text">
+                        I understand that by submitting this form, I'm opting into The Lattice. My answers may be read and considered for resonance with others who have also opted in. If a connection is found, my contact handle may be shared. I can request removal at any time.
+                    </span>
+                </label>
+            </div>
+
+            <!-- Submit -->
+            <div class="form-section submit-section">
+                <button type="submit" class="submit-button">Transmit</button>
+                <div id="status-message" class="status-message"></div>
+            </div>
+        </form>
+    </main>
+
+    <footer>
+        latticesync — resonance over algorithms
+    </footer>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://zimieokbhpkxlsdhabcz.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_0EkYiUZs_VoYC8ERZwVfmg_ibVec4VF';
+
+        const form = document.getElementById('lattice-form');
+        const statusMessage = document.getElementById('status-message');
+        const submitButton = document.querySelector('.submit-button');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Disable button during submission
+            submitButton.disabled = true;
+            submitButton.textContent = 'Transmitting...';
+            statusMessage.className = 'status-message';
+            statusMessage.style.display = 'none';
+
+            // Gather form data
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                handle: document.getElementById('handle').value.trim(),
+                age: document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
+                location: document.getElementById('location').value.trim() || null,
+                gender: document.getElementById('gender').value,
+                seeking: document.getElementById('seeking').value,
+                q1_believe: document.getElementById('q1').value.trim(),
+                q2_lesson: document.getElementById('q2').value.trim(),
+                q3_life_feel: document.getElementById('q3').value.trim(),
+                q4_thinking: document.getElementById('q4').value.trim(),
+                q5_connection: document.getElementById('q5').value.trim(),
+                q6_uncertainty: document.getElementById('q6').value.trim(),
+                q7_created: document.getElementById('q7').value.trim(),
+                q8_broken_free: document.getElementById('q8').value.trim(),
+                consent: document.getElementById('consent').checked
+            };
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/entries`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    // Redirect to confirmation page
+                    window.location.href = 'confirmed.html';
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusMessage.textContent = 'Transmission failed. Please try again.';
+                statusMessage.className = 'status-message error';
+                submitButton.disabled = false;
+                submitButton.textContent = 'Transmit';
+            }
+        });
+    </script>
+</body>
+</html>
