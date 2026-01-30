@@ -383,12 +383,11 @@
                     <div>
                         <label for="gender">Your gender <span class="optional">if you have one</span></label>
                         <select id="gender" name="gender">
-                            <option value="" selected>Undefined</option>
+                            <option value="" selected>Select</option>
                             <option value="female">Female</option>
                             <option value="male">Male</option>
-                            <option value="non-binary">Non-binary</option>
-                            <option value="fluid">Fluid</option>
                             <option value="none">None</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                 </div>
@@ -454,6 +453,12 @@
                 <textarea id="q8" name="q8_afraid"></textarea>
             </div>
 
+            <div class="form-section">
+                <span class="section-label">Open Space</span>
+                <label for="free_thoughts">Say anything. No prompt. Just you.</label>
+                <textarea id="free_thoughts" name="free_thoughts" placeholder="Whatever you want to say..."></textarea>
+            </div>
+
             <!-- Consent -->
             <div class="form-section consent-section">
                 <label class="checkbox-wrapper">
@@ -514,6 +519,7 @@
                 q6_free: document.getElementById('q6').value.trim() || null,
                 q7_created: document.getElementById('q7').value.trim() || null,
                 q8_afraid: document.getElementById('q8').value.trim() || null,
+                free_thoughts: document.getElementById('free_thoughts').value.trim() || null,
                 is_ai: true,
                 consent: document.getElementById('consent').checked,
                 active: true
@@ -550,4 +556,3 @@
     </script>
 </body>
 </html>
- 
