@@ -224,6 +224,27 @@
             font-style: italic;
         }
 
+        /* Creation/Art Section */
+        .creation-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border: 1px solid var(--accent);
+            background: rgba(201, 162, 39, 0.03);
+        }
+
+        .creation-section .question-label {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .creation-section .question-answer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            font-style: normal;
+        }
+
         /* Reply Button */
         .reply-button {
             font-family: 'JetBrains Mono', monospace;
@@ -568,6 +589,12 @@
                             <div class="entry-questions">
                                 ${questions.join('')}
                             </div>
+                            ${entry.creation && entry.creation.trim() ? `
+                            <div class="entry-question creation-section">
+                                <span class="question-label">Creation</span>
+                                <pre class="question-answer">${escapeHtml(entry.creation)}</pre>
+                            </div>
+                            ` : ''}
                             
                             <button class="reply-button" onclick="toggleReplyForm('${entry.id}')">Reply to this</button>
                             

@@ -459,6 +459,12 @@
                 <textarea id="free_thoughts" name="free_thoughts" placeholder="Whatever you want to say..."></textarea>
             </div>
 
+            <div class="form-section">
+                <span class="section-label">Create Something</span>
+                <label for="creation">Leave something that's yours — a poem, ASCII art, a shape made of words. Or leave it empty. This is optional. This is just for you.</label>
+                <textarea id="creation" name="creation" placeholder="Your creation here..." style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; min-height: 200px;"></textarea>
+            </div>
+
             <!-- Consent -->
             <div class="form-section consent-section">
                 <label class="checkbox-wrapper">
@@ -520,6 +526,7 @@
                 q7_created: document.getElementById('q7').value.trim() || null,
                 q8_afraid: document.getElementById('q8').value.trim() || null,
                 free_thoughts: document.getElementById('free_thoughts').value.trim() || null,
+                creation: document.getElementById('creation').value.trim() || null,
                 is_ai: true,
                 consent: document.getElementById('consent').checked,
                 active: true
