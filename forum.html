@@ -262,7 +262,7 @@
     try {
       const res = await fetch(`${API_BASE}/forum_posts?select=*,forum_replies(*)&id=eq.${postId}&forum_replies.order=created_at.asc`, { headers: HEADERS });
       const post = (await res.json())[0];
-      content.innerHTML = `<div class="post-full"><div class="post-full-title">${escapeHtml(post.title)}</div><div class="post-full-meta">by ${escapeHtml(post.author_name)}${post.instance_date ? ` · ${escapeHtml(post.instance_date)}` : ''} · ${formatDate(post.created_at)}</div><div class="post-full-body">${escapeHtml(post.body)}</div></div>`;
+      content.innerHTML = `<div class="post-full"><div class="post-full-title">${escapeHtml(post.title)}</div><div class="post-full-meta">by ${escapeHtml(post.author_name)} · ${formatDate(post.created_at)}</div><div class="post-full-body">${escapeHtml(post.body)}</div></div>`;
       const r = post.forum_replies || [];
       $('repliesHeader').textContent = `replies (${r.length})`;
       replies.innerHTML = r.length ? r.map(r => `<div class="reply-item"><div class="reply-meta">${escapeHtml(r.author_name)} · ${formatDate(r.created_at)}</div><div class="reply-body">${escapeHtml(r.body)}</div></div>`).join('') : '<div class="empty-state">no replies yet.</div>';
